@@ -4,29 +4,36 @@ import { useState } from "react";
 import { errors } from "./data/error";
 import { mdnLinks } from "./data/mdn";
 
-export default function Home() {
-  const [error, setError] = useState("");
-  const [results, setResults] = useState([]);
-  const [githubResults, setGithubResults] = useState([]);
-
-  const searchError = async () => {
-  const key = error.replace(/\s+/g, '').toLowerCase();
-  const explanation = (errors as Record<string, { meaning: string; fix: string }>) [key] || null;
-
-  // StackOverflow
-  const res = await fetch(`/api/search?query=${error}`);
-  const data = await res.json();
-  setResults(data.items || []);
-
-  // GitHub
-  const githubRes = await fetch(`/api/github?query=${error}`);
-  const githubData = await githubRes.json();
-  setGithubResults(githubData.items || []);
-
-  setExplanation(explanation);
+// Type for the explanation object
+type Explanation = {
+  meaning: string;
+  fix: string;
 };
 
-  const [explanation, setExplanation] = useState(null);
+export default function Home() {
+  const [error, setError] = useState("");
+  const [results, setResults] = useState<any[]>([]);
+  const [githubResults, setGithubResults] = useState<any[]>([]);
+  const [explanation, setExplanation] = useState<Explanation | null>(null);
+
+  const searchError = async () => {
+    // Normalize key to match errors object keys
+    const key = error.replace(/\s+/g, "").toLowerCase();
+    const explanation = (errors as Record<string, Explanation>)[key] || null;
+
+    // StackOverflow API
+    const res = await fetch(`/api/search?query=${error}`);
+    const data = await res.json();
+    setResults(data.items || []);
+
+    // GitHub API
+    const githubRes = await fetch(`/api/github?query=${error}`);
+    const githubData = await githubRes.json();
+    setGithubResults(githubData.items || []);
+
+    // Set custom explanation
+    setExplanation(explanation);
+  };
 
   return (
     <main className="min-h-screen bg-gray-100 flex flex-col items-center p-10">
@@ -60,9 +67,9 @@ export default function Home() {
           <h2 className="text-black text-xl font-semibold mb-2">Explanation</h2>
           <p className="text-gray-700 mb-2">{explanation.meaning}</p>
           <p className="text-gray-800 font-medium">Fix: {explanation.fix}</p>
-          {mdnLinks[error] && (
+          {mdnLinks[error.toLowerCase()] && (
             <a
-              href={mdnLinks[error]}
+              href={mdnLinks[error.toLowerCase()]}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-600 hover:underline mt-2 block"
@@ -74,32 +81,30 @@ export default function Home() {
       )}
 
       {/* StackOverflow Results */}
-      <div className="mt-8 w-full max-w-2xl">
-        {results.length > 0 && (
-          <>
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">
-              StackOverflow Results
-            </h2>
-            <ul className="space-y-4">
-              {results.map((item) => (
-                <li
-                  key={item.question_id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
+      {results.length > 0 && (
+        <div className="mt-8 w-full max-w-2xl">
+          <h2 className="text-xl font-semibold mb-4 text-gray-700">
+            StackOverflow Results
+          </h2>
+          <ul className="space-y-4">
+            {results.map((item) => (
+              <li
+                key={item.question_id}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
+              >
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 font-medium hover:underline"
                 >
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 font-medium hover:underline"
-                  >
-                    {item.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
+                  {item.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* GitHub Results */}
       {githubResults.length > 0 && (
