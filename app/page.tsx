@@ -1,26 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { errors } from "./data/error";
-import { mdnLinks } from "./data/mdn";
-
-// Type for the explanation object
-type Explanation = {
-  meaning: string;
-  fix: string;
-};
 
 export default function Home() {
   const [error, setError] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [githubResults, setGithubResults] = useState<any[]>([]);
-  const [explanation, setExplanation] = useState<Explanation | null>(null);
 
   const searchError = async () => {
-    // Normalize key to match errors object keys
-    const key = error.replace(/\s+/g, "").toLowerCase();
-    const explanation = (errors as Record<string, Explanation>)[key] || null;
-
     // StackOverflow API
     const res = await fetch(`/api/search?query=${error}`);
     const data = await res.json();
@@ -30,9 +17,6 @@ export default function Home() {
     const githubRes = await fetch(`/api/github?query=${error}`);
     const githubData = await githubRes.json();
     setGithubResults(githubData.items || []);
-
-    // Set custom explanation
-    setExplanation(explanation);
   };
 
   return (
@@ -60,25 +44,6 @@ export default function Home() {
           </button>
         </div>
       </div>
-
-      {/* Custom Explanation */}
-      {explanation && (
-        <div className="mt-6 bg-white rounded-lg shadow p-4 max-w-xl w-full">
-          <h2 className="text-black text-xl font-semibold mb-2">Explanation</h2>
-          <p className="text-gray-700 mb-2">{explanation.meaning}</p>
-          <p className="text-gray-800 font-medium">Fix: {explanation.fix}</p>
-          {mdnLinks[error.toLowerCase()] && (
-            <a
-              href={mdnLinks[error.toLowerCase()]}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline mt-2 block"
-            >
-              Official MDN Documentation
-            </a>
-          )}
-        </div>
-      )}
 
       {/* StackOverflow Results */}
       {results.length > 0 && (
