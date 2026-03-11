@@ -10,22 +10,21 @@ export default function Home() {
   const [githubResults, setGithubResults] = useState([]);
 
   const searchError = async () => {
-    // Your own explanation
-    const explanation = errors[error] || null;
+  const key = error.replace(/\s+/g, '').toLowerCase();
+  const explanation = (errors as Record<string, { meaning: string; fix: string }>) [key] || null;
 
-    // StackOverflow
-    const res = await fetch(`/api/search?query=${error}`);
-    const data = await res.json();
-    setResults(data.items || []);
+  // StackOverflow
+  const res = await fetch(`/api/search?query=${error}`);
+  const data = await res.json();
+  setResults(data.items || []);
 
-    // GitHub
-    const githubRes = await fetch(`/api/github?query=${error}`);
-    const githubData = await githubRes.json();
-    setGithubResults(githubData.items || []);
+  // GitHub
+  const githubRes = await fetch(`/api/github?query=${error}`);
+  const githubData = await githubRes.json();
+  setGithubResults(githubData.items || []);
 
-    // Save explanation for UI
-    setExplanation(explanation);
-  };
+  setExplanation(explanation);
+};
 
   const [explanation, setExplanation] = useState(null);
 
