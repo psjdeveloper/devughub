@@ -1,13 +1,16 @@
-export async function GET(req) {
+// app/api/github/route.ts
+import { NextRequest } from "next/server";
 
-  const { searchParams } = new URL(req.url)
-  const query = searchParams.get("query")
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get("query");
 
-  const res = await fetch(
-    `https://api.github.com/search/issues?q=${query}`
-  )
+  if (!query) {
+    return new Response(JSON.stringify({ items: [] }), { status: 400 });
+  }
 
-  const data = await res.json()
+  const res = await fetch(`https://api.github.com/search/issues?q=${query}`);
+  const data = await res.json();
 
-  return Response.json(data)
+  return new Response(JSON.stringify(data));
 }
