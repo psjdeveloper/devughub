@@ -96,7 +96,7 @@ export default function Home() {
           </ul>
         </div>
       )}
-
+<a href="/dictionary" className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition animate-pulse text-black">View Dictionary</a>
     </main>
   );
 }
